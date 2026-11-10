@@ -44,10 +44,11 @@ prompt = (
 for kat, items in roh.items():
     prompt += f"[{kat}]\n" + "\n".join(f"- {i['titel']}" for i in items) + "\n\n"
 
+client = genai.Client()
 top, fehler = [], []
 for modell in MODELS:
     try:
-        r = genai.Client().models.generate_content(model=modell, contents=prompt)
+                r = client.models.generate_content(model=modell, contents=prompt)
         top = [
             z.strip().lstrip("-*• ").replace("**", "")
             for z in (r.text or "").splitlines()
