@@ -48,7 +48,7 @@ client = genai.Client()
 top, fehler = [], []
 for modell in MODELS:
     try:
-                r = client.models.generate_content(model=modell, contents=prompt)
+        r = client.models.generate_content(model=modell, contents=prompt)
         top = [
             z.strip().lstrip("-*• ").replace("**", "")
             for z in (r.text or "").splitlines()
