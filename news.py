@@ -3,7 +3,7 @@ from google import genai
 from google.genai import types
 
 client = genai.Client()  # liest GEMINI_API_KEY aus der Umgebung
-MODEL = "gemini-2.5-flash"  # falls veraltet: aktuellen Flash-Namen in AI Studio nachsehen
+MODEL = "gemini-3.8-flash"  # falls veraltet: aktuellen Flash-Namen in AI Studio nachsehen
 KATEGORIEN = ["Welt", "Deutschland", "Tech & KI", "Wirtschaft", "Gaming & Roblox"]
 heute = datetime.date.today().strftime("%d.%m.%Y")
 
