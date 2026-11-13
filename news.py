@@ -2,6 +2,7 @@ import calendar, datetime, html, json, re, time, urllib.parse, urllib.request
 import feedparser
 from google import genai
 from google.genai import types
+from zoneinfo import ZoneInfo
 
 MODELS = ["gemini-3.8-flash", "gemini-3.6-flash"]
 STUNDEN = 48           # News: nur Meldungen der letzten X Stunden
@@ -26,7 +27,9 @@ STOCKS = {
     "Arista (ANET)": {"symbol": "ANET", "suche": "Arista Networks Aktie"},
     "Bitcoin": {"symbol": "BTC-USD", "suche": "Bitcoin Kurs"},
 }
-heute = datetime.date.today().strftime("%d.%m.%Y")
+jetzt = datetime.datetime.now(ZoneInfo("Europe/Berlin"))
+heute = jetzt.strftime("%d.%m.%Y")
+stand = jetzt.strftime("%d.%m.%Y, %H:%M Uhr")
 
 
 def sauber(text):
@@ -294,7 +297,7 @@ def aktie_panel(idx, name):
     versteckt = "" if idx == 0 else " hidden"
     return (
         f'<div data-panel="aktien" id="a{idx}"{versteckt}>'
-        f'<div class="kurs"><b>{html.escape(name)}</b><div class="preis">{kurs}</div></div>'
+        f'<div class="kurs"><b>{html.escape(name)}</b><div class="preis">{kurs}</div><div class="stand">Abgerufen: {stand}</div></div>'
         f'<h3>Einschätzung <small>(KI-Vermutung, keine Anlageberatung)</small></h3>'
         f'<p>{html.escape(text)}</p><h3>Nachrichten</h3><ul>{news}</ul></div>'
     )
@@ -324,6 +327,7 @@ li{margin:8px 0} a{color:#eee;text-decoration:none} a:hover{text-decoration:unde
 .kurs{background:#1c2733;border-radius:12px;padding:14px 16px;font-size:1.1em}
 .preis{font-size:1.5em;margin-top:4px} .up{color:#6fd16f} .down{color:#f07070}
 .foot{color:#777;font-size:.8em;margin-top:32px}
+.stand{color:#888;font-size:.85em;margin:4px 0 12px}
 """
 
 JS = """
@@ -342,7 +346,7 @@ page = (
     "<title>News</title><style>" + CSS + "</style>"
     "<nav>" + btn("main", "p-news", "News", True) + btn("main", "p-aktien", "Aktien")
     + btn("main", "p-fun", "Fun Facts") + "</nav>"
-    f'<div class="wrap"><h1>News {heute}</h1>'
+    f'<div class="wrap"><h1>News {heute}</h1><div class="stand">Stand: {stand}</div>'
     f'<section data-panel="main" id="p-news"><div class="top"><h2>Das Wichtigste</h2>{oben}</div>'
     f"<h2>Weitere Meldungen</h2>{unten}</section>"
     f'<section data-panel="main" id="p-aktien" hidden><div class="sub">{sub_btns}</div>{aktien_html}</section>'
