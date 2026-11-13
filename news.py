@@ -92,7 +92,7 @@ def holen(x):
         return None
 
 
-# 2) Kurse holen und in Euro umrechnen
+# 2) Kurse und Verläufe holen, in Euro umrechnen
 def usd_zu_eur():
     try:
         d = get_json("https://query1.finance.yahoo.com/v8/finance/chart/EURUSD=X?range=1d&interval=1d")
@@ -120,8 +120,19 @@ def kurs_coingecko():
     return d["bitcoin"]["eur"], d["bitcoin"].get("eur_24h_change"), "EUR"
 
 
+def hist_yahoo(symbol):
+    d = get_json(f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?range=1mo&interval=1d")
+    c = d["chart"]["result"][0]["indicators"]["quote"][0]["close"]
+    return [x for x in c if x is not None]
+
+
+def hist_coingecko():
+    d = get_json("https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=eur&days=30&interval=daily")
+    return [p[1] for p in d["prices"]]
+
+
 kurs_eur = usd_zu_eur()
-kurse = {}
+kurse, verlaeufe = {}, {}
 for name, cfg in STOCKS.items():
     try:
         preis, chg = kurs_yahoo(cfg["symbol"])
@@ -136,6 +147,19 @@ for name, cfg in STOCKS.items():
                 kurse[name] = kurs_coingecko()
             except Exception as ex2:
                 print("Kursfehler CoinGecko:", ex2)
+    try:
+        werte = hist_yahoo(cfg["symbol"])
+        if kurs_eur:
+            verlaeufe[name] = ([w * kurs_eur for w in werte], "EUR")
+        else:
+            verlaeufe[name] = (werte, "USD")
+    except Exception as ex:
+        print("Verlaufsfehler Yahoo:", name, ex)
+        if name == "Bitcoin":
+            try:
+                verlaeufe[name] = (hist_coingecko(), "EUR")
+            except Exception as ex2:
+                print("Verlaufsfehler CoinGecko:", ex2)
 
 # 3) Bisherige Fun Facts laden
 try:
@@ -267,6 +291,50 @@ def btn(group, target, label, on=False):
             f'{" class=on" if on else ""}>{html.escape(label)}</button>')
 
 
+def pfad(werte, w, h, pad):
+    mn, mx = min(werte), max(werte)
+    r = (mx - mn) or 1
+    n = (len(werte) - 1) or 1
+    teile = []
+    for i, v in enumerate(werte):
+        x = pad + i * (w - 2 * pad) / n
+        y = h - pad - (v - mn) / r * (h - 2 * pad)
+        teile.append(("L" if i else "M") + f"{x:.1f} {y:.1f}")
+    return " ".join(teile)
+
+
+def diagramme(name):
+    v = verlaeufe.get(name)
+    if not v or len(v[0]) < 2:
+        return "", '<p class="t">Verlauf nicht verfügbar.</p>'
+    werte, waehrung = v
+    zeichen = "€" if waehrung == "EUR" else "USD"
+    klein = (f'<svg viewBox="0 0 90 28" width="90" height="28" aria-hidden="true">'
+             f'<path d="{pfad(werte, 90, 28, 2)}" fill="none" stroke="#7cc4ff" stroke-width="2" '
+             f'stroke-linejoin="round" stroke-linecap="round"/></svg>')
+    p = pfad(werte, 640, 150, 10)
+    gross = (f'<svg viewBox="0 0 640 150" width="100%" role="img" aria-label="Kursverlauf des letzten Monats">'
+             f'<path d="{p} L630 140 L10 140 Z" fill="#7cc4ff" opacity="0.15"/>'
+             f'<path d="{p}" fill="none" stroke="#7cc4ff" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/></svg>'
+             f'<div class="axis"><span>vor einem Monat</span>'
+             f'<span>Tief {fmt(min(werte))} {zeichen} · Hoch {fmt(max(werte))} {zeichen}</span><span>heute</span></div>')
+    return klein, gross
+
+
+def kurs_text(name):
+    k = kurse.get(name)
+    if not (k and k[0] is not None):
+        return "Kurs nicht verfügbar", ""
+    zeichen = "€" if k[2] == "EUR" else "USD"
+    preis = f"{fmt(k[0])} {zeichen}"
+    chg = ""
+    if k[1] is not None:
+        klasse = "up" if k[1] >= 0 else "down"
+        pfeil = "▲" if k[1] >= 0 else "▼"
+        chg = f'<span class="{klasse}">{pfeil} {fmt(abs(k[1]))} %</span>'
+    return preis, chg
+
+
 if top:
     oben = "<ul>" + "".join(
         f'<li><b>{verlinkt(t["titel"], t["link"])}</b><div class="s">{html.escape(t["text"])}</div></li>'
@@ -282,34 +350,50 @@ for kat, items in auswahl.items():
     unten += f"<h3>{html.escape(kat)}</h3><ul>{liste}</ul>"
 
 
+def uebersicht_panel():
+    zeilen, grosse = "", ""
+    for n, name in enumerate(STOCKS):
+        preis, chg = kurs_text(name)
+        klein, gross = diagramme(name)
+        aktiv = " on" if n == 0 else ""
+        versteckt = "" if n == 0 else " hidden"
+        zeilen += (f'<div class="row{aktiv}" data-i="{n}"><span class="nm">{html.escape(name)}</span>'
+                   f'<span>{preis}</span><span>{chg}</span>{klein}</div>')
+        grosse += (f'<div data-big="{n}"{versteckt}><p class="lab">{html.escape(name)}: Verlauf des letzten Monats</p>'
+                   f'{gross}</div>')
+    return (f'<div data-panel="aktien" id="a-ue"><div class="box">{zeilen}</div>'
+            f'<div class="box">{grosse}</div></div>')
+
+
 def aktie_panel(idx, name):
-    k = kurse.get(name)
-    kurs = "Kurs nicht verfügbar"
-    if k and k[0] is not None:
-        zeichen = "€" if k[2] == "EUR" else "USD"
-        kurs = f"{fmt(k[0])} {zeichen}"
-        if k[1] is not None:
-            klasse = "up" if k[1] >= 0 else "down"
-            pfeil = "▲" if k[1] >= 0 else "▼"
-            kurs += f' <span class="{klasse}">{pfeil} {fmt(abs(k[1]))} %</span>'
+    preis, chg = kurs_text(name)
+    klein, gross = diagramme(name)
     text = einschaetzung.get(name) or "Keine Einschätzung verfügbar."
     news = "".join(news_li(i) for i in aktien_auswahl.get(name, [])) or "<li>Keine aktuellen Meldungen.</li>"
-    versteckt = "" if idx == 0 else " hidden"
     return (
-        f'<div data-panel="aktien" id="a{idx}"{versteckt}>'
-        f'<div class="kurs"><b>{html.escape(name)}</b><div class="preis">{kurs}</div><div class="stand">Abgerufen: {stand}</div></div>'
+        f'<div data-panel="aktien" id="a{idx}" hidden>'
+        f'<div class="kurs"><b>{html.escape(name)}</b><div class="preis">{preis} {chg}</div>'
+        f'<div class="stand">Abgerufen: {stand}</div></div>'
+        f'<div class="box">{gross}</div>'
         f'<h3>Einschätzung <small>(KI-Vermutung, keine Anlageberatung)</small></h3>'
         f'<p>{html.escape(text)}</p><h3>Nachrichten</h3><ul>{news}</ul></div>'
     )
 
 
-sub_btns = "".join(btn("aktien", f"a{n}", name, n == 0) for n, name in enumerate(STOCKS))
-aktien_html = "".join(aktie_panel(n, name) for n, name in enumerate(STOCKS))
+sub_btns = btn("aktien", "a-ue", "Übersicht", True) + "".join(
+    btn("aktien", f"a{n}", name) for n, name in enumerate(STOCKS))
+aktien_html = uebersicht_panel() + "".join(aktie_panel(n, name) for n, name in enumerate(STOCKS))
 
 if funfacts:
     fun_html = "<ol>" + "".join(f"<li>{html.escape(x)}</li>" for x in funfacts) + "</ol>"
 else:
     fun_html = "<p>Fun Facts gerade nicht verfügbar.</p>"
+
+todo_html = (
+    '<h2>To-do</h2><div class="trow"><input type="text" id="tinp" placeholder="Neue Aufgabe">'
+    '<button id="tadd">Hinzufügen</button></div><p class="err" id="terr"></p><div id="tlist"></div>'
+    '<p class="foot">Die Liste wird nur in diesem Browser gespeichert. Auf jedem Gerät ist sie getrennt.</p>'
+)
 
 CSS = """
 body{font-family:sans-serif;background:#111;color:#eee;margin:0;line-height:1.45}
@@ -324,10 +408,21 @@ h2{color:#7cc4ff;margin:0 0 6px} h3{color:#7cc4ff;margin:22px 0 4px} h3 small{co
 .top li{margin:14px 0;font-size:1.05em} .s{color:#ccc;font-size:.92em;margin-top:3px}
 li{margin:8px 0} a{color:#eee;text-decoration:none} a:hover{text-decoration:underline}
 .t{color:#999;font-size:.85em;margin-top:2px} .err{color:#e88;font-size:.8em}
-.kurs{background:#1c2733;border-radius:12px;padding:14px 16px;font-size:1.1em}
+.kurs{background:#1c2733;border-radius:12px;padding:14px 16px;font-size:1.1em;margin-bottom:12px}
 .preis{font-size:1.5em;margin-top:4px} .up{color:#6fd16f} .down{color:#f07070}
 .foot{color:#777;font-size:.8em;margin-top:32px}
 .stand{color:#888;font-size:.85em;margin:4px 0 12px}
+.box{background:#1a1a19;border-radius:12px;padding:12px 16px;margin:0 0 14px}
+.lab{color:#aaa;font-size:.9em;margin:0 0 4px}
+.row{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,.8fr) 90px;gap:12px;align-items:center;padding:10px 8px;border-bottom:1px solid #2a2a2a;cursor:pointer;border-radius:8px}
+.row:last-child{border-bottom:none} .row.on{background:#1c2733} .nm{font-weight:bold}
+.axis{display:flex;justify-content:space-between;gap:8px;font-size:.75em;color:#888;flex-wrap:wrap}
+.trow{display:flex;gap:8px;margin-top:8px}
+input[type=text]{flex:1;background:#222;color:#eee;border:1px solid #444;border-radius:8px;padding:10px;font-size:1em}
+.todo{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid #2a2a2a}
+.todo span{flex:1} .todo.done span{text-decoration:line-through;color:#777}
+.todo input{width:20px;height:20px}
+.ib{background:none;border:none;margin:0;padding:4px 10px;color:#888;font-size:1.3em}
 """
 
 JS = """
@@ -338,6 +433,42 @@ document.querySelectorAll('button[data-group]').forEach(function(b){
     document.querySelectorAll('[data-panel="'+g+'"]').forEach(function(p){p.hidden = (p.id !== t);});
   });
 });
+document.querySelectorAll('.row[data-i]').forEach(function(r){
+  r.addEventListener('click', function(){
+    document.querySelectorAll('.row[data-i]').forEach(function(x){x.classList.toggle('on', x===r);});
+    document.querySelectorAll('[data-big]').forEach(function(b){b.hidden = (b.dataset.big !== r.dataset.i);});
+  });
+});
+(function(){
+  var KEY='newsbot_todos', todos=[];
+  try{todos=JSON.parse(localStorage.getItem(KEY)||'[]');}catch(e){todos=[];}
+  if(!Array.isArray(todos)){todos=[];}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(todos));}catch(e){}}
+  var list=document.getElementById('tlist'), inp=document.getElementById('tinp'), err=document.getElementById('terr');
+  function render(){
+    list.innerHTML='';
+    todos.forEach(function(x,i){
+      var row=document.createElement('div'); row.className='todo'+(x.d?' done':'');
+      var cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!x.d;
+      cb.addEventListener('change',function(){x.d=cb.checked; save(); render();});
+      var sp=document.createElement('span'); sp.textContent=x.t;
+      var del=document.createElement('button'); del.className='ib'; del.textContent='×';
+      del.setAttribute('aria-label','Aufgabe löschen');
+      del.addEventListener('click',function(){todos.splice(i,1); save(); render();});
+      row.appendChild(cb); row.appendChild(sp); row.appendChild(del); list.appendChild(row);
+    });
+    if(!todos.length){list.innerHTML='<p class="t">Noch keine Aufgaben.</p>';}
+  }
+  function add(){
+    var v=inp.value.trim();
+    if(!v){err.textContent='Schreib zuerst eine Aufgabe.'; return;}
+    todos.unshift({t:v,d:false}); inp.value=''; err.textContent=''; save(); render();
+  }
+  document.getElementById('tadd').addEventListener('click',add);
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter'){add();}});
+  inp.addEventListener('input',function(){err.textContent='';});
+  render();
+})();
 """
 
 page = (
@@ -345,14 +476,15 @@ page = (
     '<meta name="viewport" content="width=device-width,initial-scale=1">'
     "<title>News</title><style>" + CSS + "</style>"
     "<nav>" + btn("main", "p-news", "News", True) + btn("main", "p-aktien", "Aktien")
-    + btn("main", "p-fun", "Fun Facts") + "</nav>"
+    + btn("main", "p-fun", "Fun Facts") + btn("main", "p-todo", "To-do") + "</nav>"
     f'<div class="wrap"><h1>News {heute}</h1><div class="stand">Stand: {stand}</div>'
     f'<section data-panel="main" id="p-news"><div class="top"><h2>Das Wichtigste</h2>{oben}</div>'
     f"<h2>Weitere Meldungen</h2>{unten}</section>"
     f'<section data-panel="main" id="p-aktien" hidden><div class="sub">{sub_btns}</div>{aktien_html}</section>'
     f'<section data-panel="main" id="p-fun" hidden><h2>Fun Facts</h2>{fun_html}</section>'
+    f'<section data-panel="main" id="p-todo" hidden>{todo_html}</section>'
     '<p class="foot">Zusammenfassungen, Einschätzungen und Fun Facts sind von einer KI geschrieben und können Fehler '
-    f"enthalten. Keine Anlageberatung. Stand: {heute}</p></div>"
+    f"enthalten. Keine Anlageberatung. Stand: {stand}</p></div>"
     "<script>" + JS + "</script>"
 )
 open("index.html", "w", encoding="utf-8").write(page)
@@ -363,5 +495,5 @@ if top:
 else:
     zeilen = [items[0]["titel"] for items in roh.values() if items]
 open("widget.txt", "w", encoding="utf-8").write(
-    "\n".join(f"• {z}" for z in zeilen) + f"\nStand {heute}"
+    "\n".join(f"• {z}" for z in zeilen) + f"\nStand {stand}"
 )
