@@ -20,6 +20,6 @@ jobs:
       - run: |
           git config user.name "news-bot"
           git config user.email "bot@users.noreply.github.com"
-          git add index.html widget.txt
+          git add index.html widget.txt funfacts.json
           git commit -m "News update" || exit 0
           git push
