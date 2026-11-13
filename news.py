@@ -62,12 +62,16 @@ def hole(kat, url, stunden):
         p = e.get("published_parsed") or e.get("updated_parsed")
         if p and time.time() - calendar.timegm(p) > stunden * 3600:
             continue
-        text = sauber(e.get("summary"))
+        roh_text = sauber(e.get("summary"))
+        text = roh_text
         if len(text) < 20 or titel[:30] in text:
             text = ""
+        kontext = re.sub(r"\s+", " ", roh_text.replace(titel, " ")).strip(" -–|")
+        if len(kontext) < 20:
+            kontext = ""
         gesehen.add(titel)
         item = {"id": len(alle), "kat": kat, "titel": titel,
-                "text": text[:300], "link": e.get("link", "")}
+                "text": text[:300], "kontext": kontext[:400], "link": e.get("link", "")}
         alle.append(item)
         liste.append(item)
         if len(liste) >= MAX_KANDIDATEN:
@@ -176,10 +180,10 @@ if bisher:
 
 # 4) Eine Gemini-Anfrage für alles
 prompt = (
-    "Du bekommst nummerierte Meldungen (Titel und Kurztext aus RSS-Feeds) in zwei Teilen: NACHRICHTEN und AKTIEN. Aufgaben:\n"
+    "Du bekommst nummerierte Meldungen (Titel und Kontext aus RSS-Feeds) in zwei Teilen: NACHRICHTEN und AKTIEN. Aufgaben:\n"
     f"1) 'top': Wähle aus den NACHRICHTEN die {TOP_ANZAHL} wichtigsten des Tages über alle Kategorien. "
     "Pro Meldung: 'id', 'titel' (Deutsch, max. 8 Wörter) und 'text' (Deutsch, ca. 3 Sätze, die das Thema gut erklären). "
-    "Nutze nur Informationen aus Titel und Kurztext, erfinde nichts dazu; gibt die Quelle wenig her, schreibe lieber kürzer.\n"
+    "Nutze nur Informationen aus Titel und Kontext, erfinde nichts dazu; gibt die Quelle wenig her, schreibe lieber kürzer.\n"
     f"2) 'auswahl': Nenne pro NACHRICHTEN-Kategorie die ids der bis zu {PRO_KATEGORIE} wichtigsten Meldungen, wichtigste zuerst.\n"
     f"3) 'aktien': Pro Aktie 'news' (ids der bis zu {PRO_AKTIE} für den Kurs relevantesten Meldungen) und 'einschaetzung' "
     "(Deutsch, 2-3 Sätze: Was könnten die Meldungen und die Tagesveränderung für den Kurs bedeuten? "
@@ -188,14 +192,19 @@ prompt = (
     "4) 'funfacts': genau 3 kurze Fun Facts auf Deutsch (je 1-2 Sätze), bunt gemischt aus Wissenschaft, Geschichte, Natur, "
     f"Technik und Alltag. Heute ist der {heute}. Nur gut belegte Fakten; nenne Zahlen oder Jahre nur, wenn du dir sicher bist."
     + ff_hinweis +
+    "5) 'erklaerungen': Ein Objekt, das jede id, die du in 'auswahl' oder in 'aktien' unter 'news' genannt hast, auf eine "
+    "Erklärung abbildet (nicht für 'top'). Die Erklärung hat 1-2 Sätze auf Deutsch und sagt, was passiert ist und was die "
+    "Schlagzeile meint, sodass sie auch ohne den Artikel verständlich ist. Nutze den Titel, den Kontext dieser Meldung und die "
+    "anderen Meldungen derselben Gruppe. Erfinde nichts dazu: Reicht das Material nicht, schreibe nur, was sich sicher daraus "
+    "ergibt.\n"
     'Antworte nur mit JSON im Format {"top":[{"id":0,"titel":"","text":""}],"auswahl":{"Welt":[0]},'
-    '"aktien":{"Tesla":{"news":[0],"einschaetzung":""}},"funfacts":["","",""]}\n\n'
+    '"aktien":{"Tesla":{"news":[0],"einschaetzung":""}},"funfacts":["","",""],"erklaerungen":{"0":""}}\n\n'
     "=== NACHRICHTEN ===\n"
 )
 for kat, items in roh.items():
     prompt += f"[{kat}]\n"
     for i in items:
-        prompt += f"{i['id']}: {i['titel']}" + (f" - {i['text']}" if i["text"] else "") + "\n"
+        prompt += f"{i['id']}: {i['titel']}" + (f" - Kontext: {i['kontext']}" if i["kontext"] else "") + "\n"
     prompt += "\n"
 prompt += "=== AKTIEN ===\n"
 for name, items in aktien_roh.items():
@@ -206,7 +215,7 @@ for name, items in aktien_roh.items():
         info = "Kurs nicht verfügbar"
     prompt += f"[{name}] {info}\n"
     for i in items:
-        prompt += f"{i['id']}: {i['titel']}" + (f" - {i['text']}" if i["text"] else "") + "\n"
+        prompt += f"{i['id']}: {i['titel']}" + (f" - Kontext: {i['kontext']}" if i["kontext"] else "") + "\n"
     prompt += "\n"
 
 client = genai.Client()
@@ -232,7 +241,7 @@ for modell in MODELS:
     if daten:
         break
 
-top, auswahl, aktien_auswahl, einschaetzung, funfacts = [], {}, {}, {}, []
+top, auswahl, aktien_auswahl, einschaetzung, funfacts, erklaerungen = [], {}, {}, {}, [], {}
 if daten:
     for t in (daten.get("top") or [])[:TOP_ANZAHL]:
         if not isinstance(t, dict):
@@ -255,6 +264,9 @@ if daten:
         aktien_auswahl[name] = [g for g in gew if g and g["kat"] == name][:PRO_AKTIE]
         einschaetzung[name] = a.get("einschaetzung", "")
     funfacts = [x for x in (daten.get("funfacts") or []) if isinstance(x, str)][:3]
+    erk = daten.get("erklaerungen") or {}
+    if isinstance(erk, dict):
+        erklaerungen = {str(k): v for k, v in erk.items() if isinstance(v, str)}
 for kat in roh:
     if not auswahl.get(kat):
         auswahl[kat] = roh[kat][:PRO_KATEGORIE]
@@ -282,8 +294,14 @@ def verlinkt(titel, link):
 
 
 def news_li(i):
-    text = f'<div class="t">{html.escape(i["text"])}</div>' if i["text"] else ""
-    return f'<li>{verlinkt(i["titel"], i["link"])}{text}</li>'
+    erkl = erklaerungen.get(str(i["id"]))
+    if erkl:
+        extra = f'<div class="e">{html.escape(erkl)}</div>'
+    elif i["text"]:
+        extra = f'<div class="t">{html.escape(i["text"])}</div>'
+    else:
+        extra = ""
+    return f'<li>{verlinkt(i["titel"], i["link"])}{extra}</li>'
 
 
 def btn(group, target, label, on=False):
@@ -406,8 +424,9 @@ button.on{background:#7cc4ff;color:#111;border-color:#7cc4ff;font-weight:bold}
 h2{color:#7cc4ff;margin:0 0 6px} h3{color:#7cc4ff;margin:22px 0 4px} h3 small{color:#888;font-weight:normal;font-size:.7em}
 .top{background:#1c2733;border-radius:12px;padding:14px 16px;margin:12px 0 24px}
 .top li{margin:14px 0;font-size:1.05em} .s{color:#ccc;font-size:.92em;margin-top:3px}
-li{margin:8px 0} a{color:#eee;text-decoration:none} a:hover{text-decoration:underline}
+li{margin:10px 0} a{color:#eee;text-decoration:none} a:hover{text-decoration:underline}
 .t{color:#999;font-size:.85em;margin-top:2px} .err{color:#e88;font-size:.8em}
+.e{color:#c8c8c8;font-size:.9em;margin-top:3px}
 .kurs{background:#1c2733;border-radius:12px;padding:14px 16px;font-size:1.1em;margin-bottom:12px}
 .preis{font-size:1.5em;margin-top:4px} .up{color:#6fd16f} .down{color:#f07070}
 .foot{color:#777;font-size:.8em;margin-top:32px}
@@ -483,8 +502,8 @@ page = (
     f'<section data-panel="main" id="p-aktien" hidden><div class="sub">{sub_btns}</div>{aktien_html}</section>'
     f'<section data-panel="main" id="p-fun" hidden><h2>Fun Facts</h2>{fun_html}</section>'
     f'<section data-panel="main" id="p-todo" hidden>{todo_html}</section>'
-    '<p class="foot">Zusammenfassungen, Einschätzungen und Fun Facts sind von einer KI geschrieben und können Fehler '
-    f"enthalten. Keine Anlageberatung. Stand: {stand}</p></div>"
+    '<p class="foot">Zusammenfassungen, Erklärungen, Einschätzungen und Fun Facts sind von einer KI geschrieben und '
+    f"können Fehler enthalten. Keine Anlageberatung. Stand: {stand}</p></div>"
     "<script>" + JS + "</script>"
 )
 open("index.html", "w", encoding="utf-8").write(page)
