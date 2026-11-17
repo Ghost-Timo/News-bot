@@ -12,6 +12,7 @@ PRO_KATEGORIE = 3      # Meldungen pro Kategorie
 PRO_AKTIE = 3          # Meldungen pro Aktie
 MAX_KANDIDATEN = 20    # so viele Meldungen pro Gruppe sieht Gemini
 FF_DATEI = "funfacts.json"
+FF_ANZAHL = 15         # so viele frühere Fun Facts werden angezeigt
 
 FEEDS = {
     "Welt": "https://feeds.bbci.co.uk/news/world/rss.xml",
@@ -172,6 +173,7 @@ try:
 except Exception:
     ff = {}
 bisher = ff.get("alle", []) if isinstance(ff, dict) else []
+ff_datum = ff.get("daten", {}) if isinstance(ff, dict) and isinstance(ff.get("daten"), dict) else {}
 heute_facts = ff.get("facts_heute", []) if isinstance(ff, dict) and ff.get("datum") == heute else []
 ff_hinweis = ""
 if bisher:
@@ -280,8 +282,11 @@ if heute_facts:
 elif funfacts:
     bisher = (bisher + funfacts)[-300:]
     heute_facts = funfacts
+    for x in funfacts:
+        ff_datum[x] = heute
+ff_datum = {k: v for k, v in ff_datum.items() if k in bisher}
 with open(FF_DATEI, "w", encoding="utf-8") as f:
-    json.dump({"datum": heute, "facts_heute": heute_facts, "alle": bisher},
+    json.dump({"datum": heute, "facts_heute": heute_facts, "alle": bisher, "daten": ff_datum},
               f, ensure_ascii=False, indent=1)
 
 
@@ -406,7 +411,14 @@ if funfacts:
     fun_html = "<ol>" + "".join(f"<li>{html.escape(x)}</li>" for x in funfacts) + "</ol>"
 else:
     fun_html = "<p>Fun Facts gerade nicht verfügbar.</p>"
-
+    
+frueher = [x for x in bisher if x not in funfacts][-FF_ANZAHL:][::-1]
+if frueher:
+    fun_html += "<h3>Frühere Fun Facts</h3><ul>" + "".join(
+        f'<li>{html.escape(x)}'
+        + (f' <span class="t">({html.escape(ff_datum[x])})</span>' if x in ff_datum else "")
+        + "</li>"
+        for x in frueher) + "</ul>"
 todo_html = (
     '<h2>To-do</h2><div class="trow"><input type="text" id="tinp" placeholder="Neue Aufgabe">'
     '<button id="tadd">Hinzufügen</button></div><p class="err" id="terr"></p><div id="tlist"></div>'
