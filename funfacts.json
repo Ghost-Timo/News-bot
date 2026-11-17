@@ -1,6 +1,10 @@
 {
  "datum": "17.11.2026",
- "facts_heute": [],
+ "facts_heute": [
+  "Der Mount Everest wächst durch die Erdwärme und die Kollision der indischen und eurasischen Kontinentalplatte jedes Jahr um etwa vier Millimeter in die Höhe.",
+  "Vor der Erfindung des modernen Radiergummis im Jahr 1770 benutzten Menschen weiche Brotkrumen, um Bleistiftstriche von Papier zu entfernen.",
+  "Das erste je aufgenommene Foto stammt aus dem Jahr 1826 und wurde von Joseph Nicéphore Niépce mit einer Belichtungszeit von rund acht Stunden angefertigt."
+ ],
  "alle": [
   "Der Ozean bedeckt zwar mehr als 70 Prozent der Erdoberfläche, ist jedoch bis heute zu weniger als 25 Prozent detailliert kartiert worden.",
   "Honig verdirbt durch seinen sehr geringen Wassergehalt und hohen Zuckergehalt praktisch nie; Archäologen fanden in altägyptischen Gräbern noch essbaren Honig.",
@@ -13,6 +17,14 @@
   "Bananen gehören botanisch gesehen zu den Beeren, während Erdbeeren aus botanischer Sicht als Sammelnussfrüchte klassifiziert werden.",
   "Wombats sind die einzigen bekannten Lebewesen, die würfelförmigen Kot ausscheiden, was verhindert, dass dieser von Felsen wegrollt.",
   "Die ersten Computermäuse wurden in den 1960er-Jahren entwickelt und besaßen ein Gehäuse aus Holz mit zwei rechtwinklig zueinander stehenden Metallrädern.",
-  "Muttermilch verändert ihre biologische Zusammensetzung im Laufe des Tages und enthält abends mehr Melatonin, um dem Säugling beim Einschlafen zu helfen."
- ]
+  "Muttermilch verändert ihre biologische Zusammensetzung im Laufe des Tages und enthält abends mehr Melatonin, um dem Säugling beim Einschlafen zu helfen.",
+  "Der Mount Everest wächst durch die Erdwärme und die Kollision der indischen und eurasischen Kontinentalplatte jedes Jahr um etwa vier Millimeter in die Höhe.",
+  "Vor der Erfindung des modernen Radiergummis im Jahr 1770 benutzten Menschen weiche Brotkrumen, um Bleistiftstriche von Papier zu entfernen.",
+  "Das erste je aufgenommene Foto stammt aus dem Jahr 1826 und wurde von Joseph Nicéphore Niépce mit einer Belichtungszeit von rund acht Stunden angefertigt."
+ ],
+ "daten": {
+  "Der Mount Everest wächst durch die Erdwärme und die Kollision der indischen und eurasischen Kontinentalplatte jedes Jahr um etwa vier Millimeter in die Höhe.": "17.11.2026",
+  "Vor der Erfindung des modernen Radiergummis im Jahr 1770 benutzten Menschen weiche Brotkrumen, um Bleistiftstriche von Papier zu entfernen.": "17.11.2026",
+  "Das erste je aufgenommene Foto stammt aus dem Jahr 1826 und wurde von Joseph Nicéphore Niépce mit einer Belichtungszeit von rund acht Stunden angefertigt.": "17.11.2026"
+ }
 }
