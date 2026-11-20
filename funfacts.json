@@ -1,6 +1,10 @@
 {
- "datum": "19.11.2026",
- "facts_heute": [],
+ "datum": "20.11.2026",
+ "facts_heute": [
+  "Das Gift des australischen Schnabeltiers wird nur von den Männchen über giftige Sporne an den Hinterbeinen abgegeben und dient vor allem Rivalenkämpfen während der Paarungszeit.",
+  "Die Venus ist der einzige Planet unseres Sonnensystems, der sich im Uhrzeigersinn um die eigene Achse dreht, weshalb dort die Sonne im Westen aufgeht.",
+  "Bärtierchen können extreme Bedingungen wie das Vakuum des Weltalls, Temperaturen nahe dem absoluten Nullpunkt und tödliche Strahlendosen überleben, indem sie in eine fast vollständige Kältestarre verfallen."
+ ],
  "alle": [
   "Der Ozean bedeckt zwar mehr als 70 Prozent der Erdoberfläche, ist jedoch bis heute zu weniger als 25 Prozent detailliert kartiert worden.",
   "Honig verdirbt durch seinen sehr geringen Wassergehalt und hohen Zuckergehalt praktisch nie; Archäologen fanden in altägyptischen Gräbern noch essbaren Honig.",
@@ -19,7 +23,10 @@
   "Das erste je aufgenommene Foto stammt aus dem Jahr 1826 und wurde von Joseph Nicéphore Niépce mit einer Belichtungszeit von rund acht Stunden angefertigt.",
   "Das metallische Element Gallium besitzt einen so niedrigen Schmelzpunkt von etwa 29,76 Grad Celsius, dass es bereits durch die bloße Körperwärme in der menschlichen Hand flüssig wird.",
   "Im Jahr 1903 dauerte der allererste motorisierte Flug der Brüder Wright lediglich zwölf Sekunden und deckte eine Distanz von nur etwa 37 Metern ab.",
-  "Kraken besitzen drei funktionierende Herzen sowie blaues Blut, da der Sauerstofftransport in ihrem Kreislauf auf Kupfer anstelle von Eisen basiert."
+  "Kraken besitzen drei funktionierende Herzen sowie blaues Blut, da der Sauerstofftransport in ihrem Kreislauf auf Kupfer anstelle von Eisen basiert.",
+  "Das Gift des australischen Schnabeltiers wird nur von den Männchen über giftige Sporne an den Hinterbeinen abgegeben und dient vor allem Rivalenkämpfen während der Paarungszeit.",
+  "Die Venus ist der einzige Planet unseres Sonnensystems, der sich im Uhrzeigersinn um die eigene Achse dreht, weshalb dort die Sonne im Westen aufgeht.",
+  "Bärtierchen können extreme Bedingungen wie das Vakuum des Weltalls, Temperaturen nahe dem absoluten Nullpunkt und tödliche Strahlendosen überleben, indem sie in eine fast vollständige Kältestarre verfallen."
  ],
  "daten": {
   "Der Mount Everest wächst durch die Erdwärme und die Kollision der indischen und eurasischen Kontinentalplatte jedes Jahr um etwa vier Millimeter in die Höhe.": "17.11.2026",
@@ -27,6 +34,9 @@
   "Das erste je aufgenommene Foto stammt aus dem Jahr 1826 und wurde von Joseph Nicéphore Niépce mit einer Belichtungszeit von rund acht Stunden angefertigt.": "17.11.2026",
   "Das metallische Element Gallium besitzt einen so niedrigen Schmelzpunkt von etwa 29,76 Grad Celsius, dass es bereits durch die bloße Körperwärme in der menschlichen Hand flüssig wird.": "18.11.2026",
   "Im Jahr 1903 dauerte der allererste motorisierte Flug der Brüder Wright lediglich zwölf Sekunden und deckte eine Distanz von nur etwa 37 Metern ab.": "18.11.2026",
-  "Kraken besitzen drei funktionierende Herzen sowie blaues Blut, da der Sauerstofftransport in ihrem Kreislauf auf Kupfer anstelle von Eisen basiert.": "18.11.2026"
+  "Kraken besitzen drei funktionierende Herzen sowie blaues Blut, da der Sauerstofftransport in ihrem Kreislauf auf Kupfer anstelle von Eisen basiert.": "18.11.2026",
+  "Das Gift des australischen Schnabeltiers wird nur von den Männchen über giftige Sporne an den Hinterbeinen abgegeben und dient vor allem Rivalenkämpfen während der Paarungszeit.": "20.11.2026",
+  "Die Venus ist der einzige Planet unseres Sonnensystems, der sich im Uhrzeigersinn um die eigene Achse dreht, weshalb dort die Sonne im Westen aufgeht.": "20.11.2026",
+  "Bärtierchen können extreme Bedingungen wie das Vakuum des Weltalls, Temperaturen nahe dem absoluten Nullpunkt und tödliche Strahlendosen überleben, indem sie in eine fast vollständige Kältestarre verfallen.": "20.11.2026"
  }
 }
