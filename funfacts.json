@@ -1,6 +1,10 @@
 {
- "datum": "24.11.2026",
- "facts_heute": [],
+ "datum": "25.11.2026",
+ "facts_heute": [
+  "Die Milch von Flusspferden ist von Natur aus rosa getönt, da das Tier zwei einzigartige Säuren absondert, die als natürlicher Sonnenschutz und Antibiotikum wirken.",
+  "Das bisher älteste bekannte Musikinstrument der Welt ist eine rund 40.000 Jahre alte Flöte aus Gänsegeierknochen, die in einer Höhle auf der Schwäbischen Alb gefunden wurde.",
+  "Wolken wirken zwar federleicht, doch eine durchschnittliche Kumuluswolke wiegt etwa 500 Tonnen – was ungefähr dem Gewicht von 100 Elefanten entspricht."
+ ],
  "alle": [
   "Der Ozean bedeckt zwar mehr als 70 Prozent der Erdoberfläche, ist jedoch bis heute zu weniger als 25 Prozent detailliert kartiert worden.",
   "Honig verdirbt durch seinen sehr geringen Wassergehalt und hohen Zuckergehalt praktisch nie; Archäologen fanden in altägyptischen Gräbern noch essbaren Honig.",
@@ -31,7 +35,10 @@
   "In der Schweiz ist es gesetzlich verboten, ein einzelnes Meerschweinchen zu halten, da die Tiere als sehr gesellig gelten und ohne Artgenossen vereinsamen.",
   "Der Eiffelturm in Paris kann im Sommer durch die thermische Ausdehnung des Metalls um bis zu 15 Zentimeter höher sein als im Winter.",
   "Kühe besitzen wie Menschen regionale Dialekte und muhen je nach ihrer Herkunftsregion in leicht unterschiedlichen Tonlagen.",
-  "Die Spielknete Play-Doh wurde in den 1930er-Jahren ursprünglich als Reinigungsmittel für rußverschmutzte Papiertapeten erfunden."
+  "Die Spielknete Play-Doh wurde in den 1930er-Jahren ursprünglich als Reinigungsmittel für rußverschmutzte Papiertapeten erfunden.",
+  "Die Milch von Flusspferden ist von Natur aus rosa getönt, da das Tier zwei einzigartige Säuren absondert, die als natürlicher Sonnenschutz und Antibiotikum wirken.",
+  "Das bisher älteste bekannte Musikinstrument der Welt ist eine rund 40.000 Jahre alte Flöte aus Gänsegeierknochen, die in einer Höhle auf der Schwäbischen Alb gefunden wurde.",
+  "Wolken wirken zwar federleicht, doch eine durchschnittliche Kumuluswolke wiegt etwa 500 Tonnen – was ungefähr dem Gewicht von 100 Elefanten entspricht."
  ],
  "daten": {
   "Der Mount Everest wächst durch die Erdwärme und die Kollision der indischen und eurasischen Kontinentalplatte jedes Jahr um etwa vier Millimeter in die Höhe.": "17.11.2026",
@@ -51,6 +58,9 @@
   "In der Schweiz ist es gesetzlich verboten, ein einzelnes Meerschweinchen zu halten, da die Tiere als sehr gesellig gelten und ohne Artgenossen vereinsamen.": "22.11.2026",
   "Der Eiffelturm in Paris kann im Sommer durch die thermische Ausdehnung des Metalls um bis zu 15 Zentimeter höher sein als im Winter.": "23.11.2026",
   "Kühe besitzen wie Menschen regionale Dialekte und muhen je nach ihrer Herkunftsregion in leicht unterschiedlichen Tonlagen.": "23.11.2026",
-  "Die Spielknete Play-Doh wurde in den 1930er-Jahren ursprünglich als Reinigungsmittel für rußverschmutzte Papiertapeten erfunden.": "23.11.2026"
+  "Die Spielknete Play-Doh wurde in den 1930er-Jahren ursprünglich als Reinigungsmittel für rußverschmutzte Papiertapeten erfunden.": "23.11.2026",
+  "Die Milch von Flusspferden ist von Natur aus rosa getönt, da das Tier zwei einzigartige Säuren absondert, die als natürlicher Sonnenschutz und Antibiotikum wirken.": "25.11.2026",
+  "Das bisher älteste bekannte Musikinstrument der Welt ist eine rund 40.000 Jahre alte Flöte aus Gänsegeierknochen, die in einer Höhle auf der Schwäbischen Alb gefunden wurde.": "25.11.2026",
+  "Wolken wirken zwar federleicht, doch eine durchschnittliche Kumuluswolke wiegt etwa 500 Tonnen – was ungefähr dem Gewicht von 100 Elefanten entspricht.": "25.11.2026"
  }
 }
